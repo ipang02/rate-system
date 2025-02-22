@@ -32,7 +32,7 @@ class Rating(db.Model):
 # Get admin password from environment variable
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'default_password')
 
-# Replace before_first_request with create_tables function
+# Create tables
 with app.app_context():
     db.create_all()
 
@@ -98,4 +98,5 @@ def clear_data():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
