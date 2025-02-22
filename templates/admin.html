@@ -1,0 +1,107 @@
+<!-- templates/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rating System Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1333 0%, #2d1b4e 100%);
+            min-height: 100vh;
+        }
+        .glass-effect {
+            background: rgba(45, 27, 78, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(159, 122, 234, 0.2);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8">
+    <div class="container mx-auto max-w-4xl">
+        <div class="glass-effect rounded-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-purple-400">Rating System Admin</h1>
+                <a href="/" class="text-purple-400 hover:text-purple-300">Back to Ratings</a>
+            </div>
+
+            <!-- Clear Data Section -->
+            <div class="mb-8 p-6 bg-purple-900 bg-opacity-30 rounded-xl">
+                <h2 class="text-xl font-semibold text-purple-300 mb-4">Clear All Ratings</h2>
+                <div class="flex gap-4 items-end">
+                    <div class="flex-grow max-w-md">
+                        <label for="password" class="block text-sm font-medium text-purple-300 mb-2">Admin Password</label>
+                        <input type="password" id="password" class="w-full px-4 py-2 rounded bg-purple-800 text-purple-100 border border-purple-600 focus:outline-none focus:border-purple-400">
+                    </div>
+                    <button onclick="clearData()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition duration-200">
+                        Clear All Data
+                    </button>
+                </div>
+                <p id="status-message" class="mt-2 text-sm"></p>
+            </div>
+
+            <!-- Recent Ratings -->
+            <div>
+                <h2 class="text-xl font-semibold text-purple-300 mb-4">Recent Ratings</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-purple-700">
+                                <th class="px-4 py-2 text-purple-300">ID</th>
+                                <th class="px-4 py-2 text-purple-300">Rating</th>
+                                <th class="px-4 py-2 text-purple-300">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rating in ratings %}
+                            <tr class="border-b border-purple-800">
+                                <td class="px-4 py-2 text-purple-200">{{ rating.id }}</td>
+                                <td class="px-4 py-2 text-purple-200">{{ rating.score }} ★</td>
+                                <td class="px-4 py-2 text-purple-200">{{ rating.timestamp }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function clearData() {
+            const password = document.getElementById('password').value;
+            const statusMessage = document.getElementById('status-message');
+
+            if (!password) {
+                statusMessage.textContent = 'Please enter the admin password';
+                statusMessage.className = 'mt-2 text-sm text-red-400';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('password', password);
+
+            fetch('/clear_data', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    statusMessage.textContent = data.error;
+                    statusMessage.className = 'mt-2 text-sm text-red-400';
+                } else {
+                    statusMessage.textContent = 'Data cleared successfully! Refreshing page...';
+                    statusMessage.className = 'mt-2 text-sm text-green-400';
+                    setTimeout(() => window.location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                statusMessage.textContent = 'An error occurred. Please try again.';
+                statusMessage.className = 'mt-2 text-sm text-red-400';
+            });
+        }
+    </script>
+</body>
+</html>

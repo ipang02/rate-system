@@ -1,0 +1,294 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate My System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --purple-dark: #1a1333;
+            --purple-medium: #2d1b4e;
+            --purple-light: #553592;
+            --accent-color: #9f7aea;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-medium) 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(45, 27, 78, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(159, 122, 234, 0.2);
+        }
+        
+        .emoji {
+            font-size: clamp(2rem, 4vw, 3rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            text-shadow: 0 0 20px rgba(159, 122, 234, 0.3);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        @media (max-width: 480px) {
+            .emoji-container {
+                gap: 0.5rem;
+            }
+            .emoji {
+                font-size: clamp(1.5rem, 7vw, 2rem);
+            }
+        }
+        
+        .emoji:hover {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+        
+        .selected {
+            transform: scale(1.2);
+            opacity: 1;
+            text-shadow: 0 0 30px rgba(159, 122, 234, 0.8);
+        }
+        
+        .rating-bar {
+            height: 12px;
+            background-color: rgba(159, 122, 234, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .rating-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color) 0%, #d6bcfa 100%);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(159, 122, 234, 0.5);
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .pop {
+            animation: pop 0.3s ease;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(159, 122, 234, 0.5);
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(45, 27, 78, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        /* Responsive font sizing */
+        @media (max-width: 640px) {
+            .title-text {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+            }
+            .subtitle-text {
+                font-size: clamp(0.9rem, 4vw, 1.1rem);
+            }
+            .stats-text {
+                font-size: clamp(0.8rem, 3.5vw, 1rem);
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 md:p-6 lg:p-8">
+    <div class="container mx-auto max-w-3xl w-full">
+        <div class="glass-effect rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl">
+            <div class="text-center mb-8 md:mb-12">
+                <h1 class="title-text text-4xl sm:text-5xl font-bold text-purple-400 glow-text mb-2">RATE MY SYSTEM</h1>
+                <p class="subtitle-text text-purple-300 text-base sm:text-lg opacity-80">Your feedback matters!</p>
+            </div>
+            
+            <div class="emoji-container flex justify-center flex-wrap gap-4 sm:gap-6 md:gap-8 mb-8 md:mb-16">
+                <span class="emoji" data-rating="1">😡</span>
+                <span class="emoji" data-rating="2">😕</span>
+                <span class="emoji" data-rating="3">😐</span>
+                <span class="emoji" data-rating="4">😊</span>
+                <span class="emoji" data-rating="5">😍</span>
+            </div>
+
+            <div class="text-center mb-6 md:mb-10">
+                <p class="text-xl sm:text-2xl font-semibold text-purple-300 mb-2 md:mb-3">Rating Scorecard</p>
+                <p class="stats-text text-lg sm:text-xl text-purple-200 opacity-90" id="average-rating">0.0 average based on 0 reviews.</p>
+            </div>
+
+            <div class="space-y-4 sm:space-y-6">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="text-purple-200 w-12 sm:w-16 text-sm sm:text-base font-medium">5 star</span>
+                    <div class="rating-bar flex-grow">
+                        <div class="rating-fill" id="bar-5" style="width: 0%"></div>
+                    </div>
+                    <span class="text-purple-200 w-8 sm:w-16 text-right text-sm sm:text-base font-medium" id="count-5">0</span>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="text-purple-200 w-12 sm:w-16 text-sm sm:text-base font-medium">4 star</span>
+                    <div class="rating-bar flex-grow">
+                        <div class="rating-fill" id="bar-4" style="width: 0%"></div>
+                    </div>
+                    <span class="text-purple-200 w-8 sm:w-16 text-right text-sm sm:text-base font-medium" id="count-4">0</span>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="text-purple-200 w-12 sm:w-16 text-sm sm:text-base font-medium">3 star</span>
+                    <div class="rating-bar flex-grow">
+                        <div class="rating-fill" id="bar-3" style="width: 0%"></div>
+                    </div>
+                    <span class="text-purple-200 w-8 sm:w-16 text-right text-sm sm:text-base font-medium" id="count-3">0</span>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="text-purple-200 w-12 sm:w-16 text-sm sm:text-base font-medium">2 star</span>
+                    <div class="rating-bar flex-grow">
+                        <div class="rating-fill" id="bar-2" style="width: 0%"></div>
+                    </div>
+                    <span class="text-purple-200 w-8 sm:w-16 text-right text-sm sm:text-base font-medium" id="count-2">0</span>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="text-purple-200 w-12 sm:w-16 text-sm sm:text-base font-medium">1 star</span>
+                    <div class="rating-bar flex-grow">
+                        <div class="rating-fill" id="bar-1" style="width: 0%"></div>
+                    </div>
+                    <span class="text-purple-200 w-8 sm:w-16 text-right text-sm sm:text-base font-medium" id="count-1">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emojis = document.querySelectorAll('.emoji');
+            let selectedRating = 0;
+            let touchStartTime;
+            let touchTimeout;
+
+            function updateRatings() {
+                fetch('/get_ratings')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('average-rating').textContent = 
+                            `${data.average} average based on ${data.total} reviews.`;
+                        
+                        const maxCount = Math.max(...Object.values(data.distribution));
+                        for (let i = 1; i <= 5; i++) {
+                            const count = data.distribution[i];
+                            const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                            document.getElementById(`bar-${i}`).style.width = `${percentage}%`;
+                            document.getElementById(`count-${i}`).textContent = count;
+                        }
+                    });
+            }
+
+            function handleRatingSelection(emoji) {
+                const rating = parseInt(emoji.dataset.rating);
+                
+                emojis.forEach(e => {
+                    e.classList.remove('selected');
+                    e.style.transform = 'scale(1)';
+                });
+                
+                if (selectedRating === rating) {
+                    selectedRating = 0;
+                } else {
+                    emoji.classList.add('selected', 'pop');
+                    selectedRating = rating;
+
+                    fetch('/submit_rating', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ rating: rating })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        updateRatings();
+                        setTimeout(() => emoji.classList.remove('pop'), 300);
+                    });
+                }
+            }
+
+            // Handle both click and touch events
+            emojis.forEach(emoji => {
+                // Click events
+                emoji.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    handleRatingSelection(this);
+                });
+
+                // Touch events
+                emoji.addEventListener('touchstart', function(e) {
+                    touchStartTime = Date.now();
+                    touchTimeout = setTimeout(() => {
+                        this.style.transform = 'scale(1.1)';
+                    }, 100);
+                });
+
+                emoji.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    clearTimeout(touchTimeout);
+                    
+                    // Only trigger if it was a short tap
+                    if (Date.now() - touchStartTime < 500) {
+                        handleRatingSelection(this);
+                    }
+                    
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'scale(1)';
+                    }
+                });
+
+                // Mouse hover effects
+                emoji.addEventListener('mouseover', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'scale(1.1)';
+                    }
+                });
+
+                emoji.addEventListener('mouseout', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.transform = 'scale(1)';
+                    }
+                });
+            });
+
+            // Initial ratings update
+            updateRatings();
+
+            // Handle window resize
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    // Reset any necessary styles or layouts
+                    emojis.forEach(emoji => {
+                        if (!emoji.classList.contains('selected')) {
+                            emoji.style.transform = 'scale(1)';
+                        }
+                    });
+                }, 250);
+            });
+        });
+    </script>
+</body>
+</html>
