@@ -97,6 +97,24 @@ def clear_data():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+# Add this new route to your existing app.py
+@app.route('/delete_rating/<int:rating_id>', methods=['POST'])
+def delete_rating(rating_id):
+    if request.form.get('password') != ADMIN_PASSWORD:
+        return jsonify({'error': 'Invalid password'}), 403
+    
+    try:
+        rating = Rating.query.get(rating_id)
+        if rating is None:
+            return jsonify({'error': 'Rating not found'}), 404
+            
+        db.session.delete(rating)
+        db.session.commit()
+        return jsonify({'message': 'Rating deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port)

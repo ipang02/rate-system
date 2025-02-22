@@ -16,6 +16,27 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(159, 122, 234, 0.2);
         }
+        .delete-btn {
+            transition: all 0.3s ease;
+        }
+        .delete-btn:hover {
+            background-color: rgba(239, 68, 68, 0.9);
+            transform: scale(1.05);
+        }
+        .table-container {
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: rgba(45, 27, 78, 0.3);
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body class="p-4 md:p-6 lg:p-8">
@@ -23,10 +44,10 @@
         <div class="glass-effect rounded-2xl p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold text-purple-400">Rating System Admin</h1>
-                <a href="/" class="text-purple-400 hover:text-purple-300">Back to Ratings</a>
+                <a href="/" class="text-purple-400 hover:text-purple-300 transition-colors">Back to Ratings</a>
             </div>
 
-            <!-- Clear Data Section -->
+            <!-- Clear All Data Section -->
             <div class="mb-8 p-6 bg-purple-900 bg-opacity-30 rounded-xl">
                 <h2 class="text-xl font-semibold text-purple-300 mb-4">Clear All Ratings</h2>
                 <div class="flex gap-4 items-end">
@@ -34,7 +55,7 @@
                         <label for="password" class="block text-sm font-medium text-purple-300 mb-2">Admin Password</label>
                         <input type="password" id="password" class="w-full px-4 py-2 rounded bg-purple-800 text-purple-100 border border-purple-600 focus:outline-none focus:border-purple-400">
                     </div>
-                    <button onclick="clearData()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition duration-200">
+                    <button onclick="clearAllData()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition duration-200">
                         Clear All Data
                     </button>
                 </div>
@@ -44,21 +65,36 @@
             <!-- Recent Ratings -->
             <div>
                 <h2 class="text-xl font-semibold text-purple-300 mb-4">Recent Ratings</h2>
-                <div class="overflow-x-auto">
+                <div class="table-container">
                     <table class="w-full text-left">
-                        <thead>
+                        <thead class="sticky top-0 bg-purple-900 bg-opacity-80">
                             <tr class="border-b border-purple-700">
-                                <th class="px-4 py-2 text-purple-300">ID</th>
-                                <th class="px-4 py-2 text-purple-300">Rating</th>
-                                <th class="px-4 py-2 text-purple-300">Timestamp</th>
+                                <th class="px-4 py-3 text-purple-300">ID</th>
+                                <th class="px-4 py-3 text-purple-300">Rating</th>
+                                <th class="px-4 py-3 text-purple-300">Timestamp</th>
+                                <th class="px-4 py-3 text-purple-300">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for rating in ratings %}
-                            <tr class="border-b border-purple-800">
-                                <td class="px-4 py-2 text-purple-200">{{ rating.id }}</td>
-                                <td class="px-4 py-2 text-purple-200">{{ rating.score }} ★</td>
-                                <td class="px-4 py-2 text-purple-200">{{ rating.timestamp }}</td>
+                            <tr class="border-b border-purple-800 hover:bg-purple-800 hover:bg-opacity-30 transition-colors">
+                                <td class="px-4 py-3 text-purple-200">{{ rating.id }}</td>
+                                <td class="px-4 py-3 text-purple-200">
+                                    <div class="flex items-center">
+                                        <span class="mr-2">{{ rating.score }}</span>
+                                        {% set emojis = ['😡', '😕', '😐', '😊', '😍'] %}
+                                        <span>{{ emojis[rating.score - 1] }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-purple-200">{{ rating.timestamp }}</td>
+                                <td class="px-4 py-3">
+                                    <button 
+                                        onclick="deleteRating('{{ rating.id }}')"
+                                        class="delete-btn bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600 transition-colors"
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -69,7 +105,7 @@
     </div>
 
     <script>
-        function clearData() {
+        function clearAllData() {
             const password = document.getElementById('password').value;
             const statusMessage = document.getElementById('status-message');
 
@@ -100,6 +136,37 @@
             .catch(error => {
                 statusMessage.textContent = 'An error occurred. Please try again.';
                 statusMessage.className = 'mt-2 text-sm text-red-400';
+            });
+        }
+
+        function deleteRating(ratingId) {
+            const password = document.getElementById('password').value;
+            if (!password) {
+                alert('Please enter the admin password first');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this rating?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('password', password);
+
+            fetch(`/delete_rating/${ratingId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                alert('An error occurred. Please try again.');
             });
         }
     </script>
