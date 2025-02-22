@@ -32,8 +32,8 @@ class Rating(db.Model):
 # Get admin password from environment variable
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'default_password')
 
-@app.before_first_request
-def create_tables():
+# Replace before_first_request with create_tables function
+with app.app_context():
     db.create_all()
 
 @app.route('/')
